@@ -1,0 +1,90 @@
+<html>
+<head>
+  <title>Stratego Based Programming Competition</title>
+</head>
+
+<body>
+
+<h1> Quick Details</h1>
+<h2> git </h2>
+<p> The git repository is listed on <a href="http://git.ucc.asn.au/"/>The UCC git page</a> as "progcomp2012.git" </p>
+<p> <a href="http://git.ucc.asn.au/?p=progcomp2012.git;a=summary"/>Direct Link Here</a></p>
+
+<h2> Mailing List </h2>
+<p> We will use the same mailing list as last year (<a href="http://lists.ucc.gu.uwa.edu.au/mailman/listinfo/progcomp"/>progcomp</a>). </p>
+
+<h2> irc channel </h2>
+<p> There is a #progcomp irc channel on the ucc irc server (irc.ucc.asn.au) where you can ask questions, and someone might even answer them! </p>
+
+<h1> Stratego </h1>
+<p> <a href="http://www.edcollins.com/stratego/"/>This site</a> explains what Stratego is. </p>
+
+<h1> Programming Competition </h1>
+<p> Create an AI to play Stratego. </p>
+<p> Programs are written independently and interface through stdin/stdout with a manager program, which queries them on setup and moves. </p>
+
+<h3> The Manager Program </h3>
+<p> The manager program provides the protocol for two seperate AI to play a game of stratego. It has the imaginative name of 'stratego', but I will probably refer to it as 'the manager program' or 'stratego' with absolutely no consistency. </p>
+<p> It also aims to assist with AI design by providing options for graphical or terminal output and saving/reading games from files </p>
+<p> </p>
+<p> Human players are also supported, although the interface is minimal, as this feature is meant for testing. </p>
+<p> If you just want to play a game, without having to write your own AI, try <a href="http://www.probe.imersatz.com/"/>Probe</a> </p>
+
+<h4> Windows Support </h4>
+<p> Windows is not supported at this stage. </p>
+<p> Why? Because windows doesn't have fork, or pthread, which I used to write the program because they work on linux, and I use debian. </p>
+
+<h4> Bug reports </h4>
+<p> Please report bugs to matches@ with a detailed description, and if possible, the output of gdb, valgrind, or both :) </p>
+<h5> Known Bugs </h5>
+<ol>
+	<li> Ash reported a segfault upon every program start, running under Ubuntu. I can't replicate this bug, and don't have any other information. </li>
+</ol>
+
+<h4> Screenshot </h4>
+<img border="0" src="screenshot.png" alt="Graphical output of 'stratego' manager program." title="Graphical output of 'stratego' manager program. Options '-g' for graphics and '-b' to hide Blue pieces that have not taken part in combat yet. Red and Blue are both linked to the 'asmodeus' AI. Taken with scrot on 7/12/11." width="327" height="344" />
+
+<h3> Protocol </h3>
+<p> For the sake of simplicity and keeping things in one place, the protocol is now entirely described in the <a href="doc/manager_manual.txt"/>manual page</a> of the manager program. All updates to the protocol will be reflected in that file. </p>
+
+<p> Major updates to the manager program or protocol will be accompanied by an email to the mailing list. However, it is probably a good idea to clone the git repository, and regularly pull from it. </p>
+
+<p> <b> Warning:</b> AI programs <b>must</b> unbuffer stdin and stdout themselves. This is explained in the manual page, but I figured no one would read it. It is fairly simple to unbuffer stdin/stdout in C/C++ and python, I have not investigated other languages yet. </p>
+
+<h2> Scoring and Results </h2>
+<p> The competition will be a round robin, with every AI playing three (3) games against each possible opponent. A points system is used to score each AI, 3 points for a Win, 2 for a Draw, 1 for a Loss or -1 for an Illegal response (counts as a Win for the opponent). Scores accumulate between rounds. </p>
+<p> The winning AI will be the AI with the highest score after all games have been played. In the event of a tied score, the two highest scoring AI's will play one more round consisting of three games. If the scores are still tied, the official outcome will be a Draw. </p>
+<p> When the competition officially runs, results will appear <a href="results"/>here</a>. There may (or may not) be test results there now. </p> <p> 
+
+<h2> Sample AI Programs </h2>
+<p> Several sample AI programs are currently available. The sample programs can be downloaded from the <a href="http://git.ucc.asn.au/?p=progcomp2012.git;a=summary"/>git repository </a>
+<p> <b> Warning: </b> No guarantees are provided about the functioning of these programs. It is your own responsibility to ensure that your submission obeys the protocol correctly. If you have based your program off a sample, please double check that it obeys the protocol. </p>
+<h2> Submissions </h2>
+<p> You must submit the full source code, and build instructions or makefile(s) for your program. </p>
+<p> Also include the name of the executable or script, the name of the AI, your name, and optionally a description of your AI and its tactics. </p>
+<p> Please email matches@ if you have a submission. </p>
+<p> <b> Code which attempts to comprimise the host machine, or interfere either directly or indirectly with the functioning of other programs will be disqualified. </b> </p>
+
+<h2> Dates </h2>
+<p> The competition is now officially open. Submissions will be accepted until midday, Saturday the 10th of March, 2012. Results will be announced as soon as they are available (depending on the number of entries it may take several days to simulate the competition). </p>
+
+<h2> Clarifications </h2>
+<ul>
+	<li> We are using the newer rules described <a href="http://www.edcollins.com/stratego/stratego-rules-later.htm"/>here</a>. </li>
+	<li> Scouts may move multiple spaces and attack in the same turn (in some versions they cannot). </li>
+	<li> Bombs remain in place until destroyed by a Miner (some versions incorporate "single-use" Bombs). </li>
+	<li> Victory is possible by either capturing the enemy Flag, or destroying all mobile enemy pieces.
+	AI programs do not have to "surrender" (as stated in the rules) if they have no mobile pieces. The manager program should end the game (if it does not, please report the bug)! </li>
+	<li> The newest versions of the physical board game reverse the numbers of the ranks (10 is the Marshal, 1 is the Spy). Our system uses the original numbering (1 is the Marshal, 9 is the Scout and s is the Spy). </li>
+	
+	<li> You must always make a move. </li>
+	<li> <b>Remember to unbuffer stdin/stdout!</b> </li>
+</ul>
+
+<h2> Questions? </h2>
+<p> <a href="faq.html"/>Frequently Asked Questions</a> </p>
+<p> Please email matches@ or post to #progcomp with any questions not on that page. </p>
+<p> <b>Last webpage update: 07/01/12</b></p>
+</body>
+
+</html>

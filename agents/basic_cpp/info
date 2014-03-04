@@ -1,0 +1,4 @@
+basic_cpp
+Sam Moore
+C++
+Sample AI - Provides classes that obey the manager program's protocol, and stores the state of the board and pieces, but only makes randomised moves.

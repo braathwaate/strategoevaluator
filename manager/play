@@ -1,0 +1,12 @@
+#!/bin/bash
+
+
+
+wget -r -c -np -nd -A "*.vs.*" -R "*.stderr" http://progcomp.ucc.asn.au/log/
+
+for i in *.vs.*; do
+	if ! [ -e $i.mp4 ]
+	then
+		./stratego -v $i.mp4 -f $i -g  
+	fi
+done

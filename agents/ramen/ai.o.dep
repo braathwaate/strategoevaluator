@@ -1,0 +1,1 @@
+ai.o: ai.c interface.h ai_common.h

@@ -1,0 +1,4 @@
+asmodeus.py
+Sam Moore
+python
+Sample AI - Improves <a href=basic_python.html>basic_python</a> Scores moves based on paths towards enemy units and known combat outcomes, chooses highest scoring move.

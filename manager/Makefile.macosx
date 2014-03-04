@@ -1,0 +1,27 @@
+#Makefile for Stratego
+
+LIBRARIES = -lpthread
+FRAMEWORKS = -framework SDL -framework OpenGL
+LDFLAGS = $(FRAMEWORKS) $(LIBRARIES)
+CXXFLAGS = -Wall -pedantic -g -I/Library/Frameworks/SDL.framework/Headers/
+
+OBJ = main.o controller.o network_controller.o ai_controller.o human_controller.o program.o network.o thread_util.o stratego.o graphics.o game.o
+
+BIN = stratego
+
+$(BIN) : $(OBJ) 
+	$(CXX) $(CXXFLAGS) -o $(BIN) $(OBJ) osx/SDLMain.m -framework Cocoa $(LDFLAGS)
+
+
+%.o : %.cpp %.h
+	$(CXX) $(CXXFLAGS) -c $<
+
+clean :
+	$(RM) $(BIN) $(OBJ) $(LINKOBJ)
+
+clean_full: #cleans up all backup files
+	$(RM) $(BIN) $(OBJ) $(LINKOBJ)
+	$(RM) *.*~
+	$(RM) *~
+
+

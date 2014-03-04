@@ -1,0 +1,18 @@
+../../stratego/src/run_stratego.sh RED SETUP
+BFB7968984
+4B6B58Bs67
+B998356819
+9425975937
+../agents/ramen/ramen BLUE SETUP
+967B669999
+6724898974
+BB31555583
+FB8sB479B8
+1 RED: 0 3 DOWN 3 BOTHDIE 9 9
+1 BLU: 
+Game ends on BLUE's turn - REASON: Unintelligable response
+SIGPIPE - Broken pipe (AI program no longer running)
+	Strange; BLUE still appears valid.
+	RED also appears valid. Exiting with ERROR.
+Game ends on BLUE's turn - REASON: Internal controller error - Unspecified ERROR
+../agents/ramen/ramen BLUE ILLEGAL 1 146 146

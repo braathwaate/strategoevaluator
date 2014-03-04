@@ -1,0 +1,4 @@
+vixen.patched.py
+Sam Moore
+python
+Sample AI - An improvement on <a href=asmodeus.html>asmodeus'</a> score optimisation. Considers probabilities for unknown enemy units, and sums scores for paths with common first move.
