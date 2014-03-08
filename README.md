@@ -47,5 +47,9 @@ easy attack,
 a bug that perhaps should easily be fixed.
 
 celsius was the runner up in the 2012 programming competition.
-It uses its pieces aggressively to attack unknown pieces.
-Usually it ends up with losing its high pieces quickly.
+It uses its low ranking pieces early in the game
+to aggressively attack unknown pieces.
+Often it ends up losing these pieces quickly
+but as often these forays result in substantial material gain,
+especially eights, making this bot difficult to win
+against successively. 
