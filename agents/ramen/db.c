@@ -58,11 +58,17 @@ char *DB_GetOpponentFile(const char *Opponent)
 			if(*str == '.')	last_dot = str;
 			str ++;
 		}
-		filename = last_slash + 1;
-		if( last_slash > last_dot )
-			filenamelen = str - filename;
-		else
-			filenamelen = last_dot - filename;
+		if (last_slash != NULL) {
+			filename = last_slash + 1;
+			if( last_slash > last_dot )
+				filenamelen = str - filename;
+			else
+				filenamelen = last_dot - filename;
+		} else {
+			filename = str;
+			filenamelen = strlen(str);
+		}
+
 	}
 
 	int len = snprintf(NULL, 0, "%08x_%.*s.ramen", checksum, filenamelen, filename);

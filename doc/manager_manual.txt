@@ -1,0 +1,518 @@
+NAME
+	stratego - Interface to manage games of stratego between AI programs and/or human players
+	
+
+
+SYNOPSIS
+	stratego {[-gpirb] [-o output_file ] [-t stall_time] [-T timeout_time] [-m max_turns] [-I image_directory] {red_player blue_player | -f input_file} | {-h | --help} }
+
+QUICK EXAMPLE - Play against a sample AI, using graphics, hiding the AI's pieces
+	stratego -g -b @human ../../agents/vixen/vixen.py
+
+QUICK EXAMPLE - Play two sample AI, using graphics, and a delay of 1 second between moves
+	stratego -g -t 1 ../../agents/vixen/vixen.py ../../agents/basic_python/basic_python.py
+
+DESCRIPTION
+	stratego manages a game of Stratego. It stores the state of the board, and uses a simple protocol to interface with AI programs.
+	By itself, stratego does not "play" the game. An external AI program must be used. stratego is intended to be used for the testing of 
+	various AI strategies, written in any programming language. It will be used for the UCC Programming Competition 2012.
+
+	Unless the -h (--help) or -f switch is given, both red_player and blue_player must be supplied.
+
+	red_player
+		Should be either a path to an executable file which will control the Red player, or "@human" or "@network[:IP_ADDRESS]"
+
+		If player is @human, then control will be given to a human, via stdin if graphics is disabled, or via "point and click" if graphics is enabled.
+		
+		If player is @network, then commands will be read from another copy of stratego accross the network.
+		In addition, commands from the other player will be sent accross the network to the connected stratego program.
+		
+		If no IP_ADDRESS is given, the program acts as the server, and accepts the first connection it receives.
+		If an IP_ADDRESS is given, the program attempts to connect as the client to the specified address.
+
+		Each player uses a different port; both players may be network controlled.
+			
+	blue_player
+		As red_player, except for controlling the Blue player.
+
+A WARNING ABOUT BUFFERING
+	The AI programs must unbuffer their stdin and stdout streams, otherwise it will be seen to be non-responsive.
+	If you C and you know a way to force the process started by exec() to have unbuffered stdin/stdout, please email the author.
+
+	In C or C++, unbuffering is accomplished with the following lines, which should appear near the start of main()
+		setbuf(stdin, NULL);
+		setbuf(stdout, NULL);
+	In python, unbuffering is accomplished by passing the -u switch to the interpreter, ie: The first line of a script reads:
+		#!/usr/bin/python -u
+	
+	
+OPTIONS
+	-g
+		NOTE: This switch only functions if stratego is built with graphics enabled. See BUILDING for more information.
+
+		By default, graphics are disabled. If the -g switch is present, stratego will draw the game as it is played using SDL/OpenGL
+		
+	-p
+		By default, even if graphics are disabled, the board state is not printed. If -p is present, the board will be printed to stdout.
+		If the system supports colour, the characters will be in colour.
+		Yes, If -p and -g are both present you will see both behaviours (overkill)!
+	-i
+		By default, stratego will exit if a move which is deemed "illegal" is made. If the -i switch is present, illegal moves will be ignored.
+		That is, the move will not be made (effectively the player making the illegal move loses a turn).
+
+		NOTE: If -i is not given and a human player accidentally(?) makes an illegal move, they will be asked to make a different move. The game will continue.
+		This is intended to prevent fits of rage due to the horrible graphical interface causing humans to make illegal moves.
+	-r
+		By default, the identities of all pieces are shown. If the -r switch is present, and graphics are enabled, red pieces will be disguised.
+		If graphics are disabled, the -r switch has no effect.
+
+		Pieces which have previously taken part in combat (and survived) will be revealed.
+	-b
+		As -r, except blue pieces will be disguised.
+		NOTE: Both -r and -b may be used together.
+	-o
+		By default, stratego does not log moves. If the -o switch is present, the result of each move is printed to a file. 
+		If output_file is "stdout" then stdout will be used instead of a text file.
+	-t
+		By default, stratego executes moves as fast as they are recieved. If the -t switch is present, a delay of stall_time will be introduced
+		between each move.
+		
+		If stall_time is negative or "inf", stratego will wait for the user to press enter before moving to the next move.
+		
+		It is tentatively planned to allow the user to enter various commands to alter the game or proceed to specified turns.
+		However this is slightly complicated. So it might never be done.
+
+	-T
+		By default, stratego allows AI programs 2 seconds to respond before declaring their move ILLEGAL due to a timeout.
+		If the -T switch is present, AI programs will be allowed timeout_time to respond before their move is declared ILLEGAL.
+
+		If timeout_time is negative or "inf", stratego will never declare moves illegal due to timeouts.
+	
+		Human players are never subject to timeouts.
+		
+	-m
+		By default, the game is declared a Draw after 5000 turns have ellapsed.
+		Use this option to change the maximum number of turns.
+		To play for an infinite number of turns, supply "inf" as max_number. This is not recommended for obvious reasons.
+
+	-f
+		By default, stratego requires red_player and blue_player to enact a game.
+		If this option is supplied, a file previously produced by using the -o switch is read, and the game reenacted.
+		All switches function as normal with -f.
+		NOTE: It is recommended that -g is used with -f.
+
+	-I
+		stratego can output image files in the BMP format, when built with graphics.
+		If this option is supplied, a directory indicated will be used, and a .bmp image will be saved to the directory after each move.
+		The images will be numbered from 0.bmp (before the game starts) with increasing integers for each move.
+		Note that the image number corresponds to the move number, not the turn number. 
+		The move number is odd after RED has moved, and even after BLUE has moved.
+
+		NOTE: The -I switch will automatically enable graphics, even if the -g switch is not supplied.
+
+	-v
+		If you have ffmpeg on your system, you can use this to quickly create a video.
+		When this option is supplied, stratego first outputs image files to a temporary directory in BMP format.
+		After the game is finished, these files are used to create an mp4 movie with the specified name:
+			
+		$ ffmpeg -r 10 -b 1024k -i tmp/%d.bmp filename
+		
+		The temporary images will then be deleted.
+
+	-h, --help
+		If the -h switch is used, this page will be printed and stratego will exit.
+		
+		
+
+GAME RULES
+		Each player controls 40 pieces on the Board. The pieces are represented by the following characters:
+
+		Piece	Name		Rank	Number	Abilities
+		1	Marshal		1	1	Dies if attacked by Spy
+		2	General		2	1	
+		3	Colonel 	3	2	
+		4	Major		4	3	
+		5	Captain		5	4	
+		6	Lieutenant 	6	4
+		7	Sergeant   	7	4
+		8	Miner		8	5	Destroys Bombs
+		9	Scout		9	8	May move more through multiple empty squares
+		s	Spy		10	1	If the Spy attacks the Marshal, the Marshal dies
+		B	Bomb		NA	6	Immobile. If any piece (except a Miner) attacks an enemy Bomb, that piece is destroyed.
+		F	Flag		NA	1	Immobile. If any piece attacks the enemy Flag, the controlling player wins.
+
+		Additional pieces, not controlled by the player:
+		Piece	Name			Number	Notes
+		+	Obstacle		8	Immobile. Do not belong to either player. Can't be passed through.
+		#	Enemy Piece		0 - 40	Indicates that the position on the board is occupied by an enemy piece.
+		.	Empty			NA	Indicates that the position on the board is empty.
+		
+		Players take turns to move their pieces. RED begins the game.
+
+		Pieces may only move one square horizontally or vertically unless otherwise stated.
+		Pieces may not move through squares occupied by allied pieces, or Obstacle (+) pieces.
+		Pieces may move into squares occupied by Enemy Pieces (#), in which case the piece with the lower rank (higher number) is destroyed.
+		If the moved piece (attacker) has the lower rank, the stationary piece (defender) does _not_ move into the attacker's square.
+
+		Each player's pieces are hidden from the other player. When two pieces encounter each other, the ranks will be revealed.
+
+		The objective is to either destroy all enemy pieces except the Bombs and Flag, or to capture the Flag.
+
+		Since 20/12/2011 Bombs reflect the traditional rules; they are only destroyed by Miners.
+		In previous versions contact of an attacker other than a Miner with a Bomb destroyed the Bomb as well as the attacking piece.
+
+		Since 9/04/2012 An AI must place ALL 40 pieces listed above, or its setup will be declared illegal
+		
+		
+
+PROTOCOL
+	WARNING: This is quite a wordy section. To avoid being scared off, try just copying a sample AI program. They obey the protocol already.
+
+	In order to interface with stratego, an AI program must satisfy the following protocol. 
+	The protocol has been grouped into several sections. It is suggested that you read and implement the below sections in order.
+
+	In the "Synopsis" of each section, a line beginning with the three characters ">> " indicates information sent to the AI.
+			  a line beginning with the three characters "<< " indicates the form of the expected response.
+	Each line is always terminated with a new line character '\n'.
+
+	A vertical bar '|' indicates that the line may have the form shown either to the left, or the right.
+	Fields in square brackets '[' and ']' are optional. The default value will be shown within the brackets after a '=' character.
+
+	Any words preceeded by a '$' character are not to be interpreted literally; in the actual protocol, these words are replaced with information.
+	The information will not contain any whitespace unless otherwise stated.
+	The meaning of these words is explained below the "Synopsis" under the "Explanation" subheading for each section of the protocol.
+
+	Words not preceeded by a '$' character should be interpreted literally;
+		>> START
+	Means that "START", followed by a new line, is printed to the AI.
+	
+	
+	1. Setup
+		---------------------------------------------------
+		Description
+		---------------------------------------------------
+		Setup only occurs once; during the setup phase, AI are provided with information about their colour and opponent.
+		They must then respond with four lines detailing their setup.
+
+		Setup occurs before the first move; your AI should expect to recieve and respond to Setup messages immediately after starting.
+		Immediately after the setup phase, the AI should expect to recieve messages desribed by the Turn section of the protocol.
+		---------------------------------------------------
+		Synopsis:
+		---------------------------------------------------
+		>> $COLOUR $OPPONENT $WIDTH $HEIGHT
+		<< $ROW1
+		<< $ROW2
+		<< $ROW3
+		<< $ROW4
+		---------------------------------------------------
+		Explanation:
+		---------------------------------------------------
+
+		COLOUR - The colour assigned to the AI. Will be either "RED" or "BLUE"
+			    - Colour is important, because "RED" is always at the top of the board, and "BLUE" at the bottom.
+
+		OPPONENT - Your AI may identify its opponents through this string
+
+		WIDTH - The width of the board. This will always be 10
+		HEIGHT - The height of the board. This will always be 10
+
+		ROW1 - The highest row on the board of the AI's setup.
+		     - For RED, this is the back row, but for BLUE, it is the front row.
+		ROW2 - The next highest row
+		ROW3 - The next highest row
+		ROW4 - The lowest row on the board of the AI's setup
+		     - For RED, this is the front row, but for BLUE, it is the back row.
+	
+		Each row, ROW1 -> ROW4, should consist of WIDTH characters. Each character identifies a piece, as shown under "GAME RULES" above.
+
+		An AI program does not have to place all 40 pieces, but must at least place the flag ('F').
+		However, note that an AI program with no mobile pieces will immediately lose.
+		---------------------------------------------------
+		Example:
+		---------------------------------------------------
+		>> RED ../../agents/vixen/vixen.py 10 10
+		<< FB8sB479B8
+		<< BB31555583
+		<< 6724898974
+		<< 967B669999
+
+		In this example, the AI will be playing as "RED". It's opponent is the "vixen" sample AI.
+		The board width and height will always be 10.
+		
+		The AI responds with a sensible setup for the "RED" player, putting the flag in the back corner.
+
+	2. Turn
+		---------------------------------------------------
+		Description
+		---------------------------------------------------
+		After the Setup phase, a number of Turns occur, until the game ends.
+
+		Warning: The game may end between turns, in which case a "QUIT" message is sent. 
+			The "QUIT" message will be sent in place of the first line in the synopsis shown below.
+			Read "3. End Game" below.
+		---------------------------------------------------
+		Synopsis
+		---------------------------------------------------
+		For the AI with colour "RED" only, and only on the very first turn:
+		>> START
+		>> $ROW1
+		>> $ROW2
+		>> $ROW3
+		>> $ROW4
+		>> $ROW5
+		>> $ROW6
+		>> $ROW7
+		>> $ROW8
+		>> $ROW9
+		>> $ROW10
+		<< $X $Y $DIRECTION [$MULTIPLIER=1]
+		>> $X $Y $DIRECTION [$MULTIPLIER=1] $OUTCOME
+
+		For the AI with colour "RED" on every subsequent turn, and the AI with colour "BLUE" on all turns:
+		>> $LASTMOVE $OUTCOME
+		>> $ROW1
+		>> $ROW2
+		>> $ROW3
+		>> $ROW4
+		>> $ROW5
+		>> $ROW6
+		>> $ROW7
+		>> $ROW8
+		>> $ROW9
+		>> $ROW10
+		<< $X $Y $DIRECTION [$MULTIPLIER=1]
+		>> $X $Y $DIRECTION [$MULTIPLIER=1] $OUTCOME | QUIT [$RESULT]
+		---------------------------------------------------
+		Explanation:
+		---------------------------------------------------
+
+		[Recieved data 1]
+
+		LASTMOVE - The last move made
+			 - That is, the move made by the opponent AI, immediately before this move
+			 - It is a direct copy of the opponent AI's response
+			 - On the very first turn, since no move has been made, "START" is printed to the RED AI
+		
+		OUTCOME - The interpretation of the move by the manager program; will be one of the following
+			- Successful, uneventful move: "OK"
+			- Illegal move: "ILLEGAL"
+			- The moved piece attacked and destroyed an opponent piece: "KILLS $ATTACKER_RANK $DEFENDER_RANK"
+				- ATTACKER_RANK and DEFENDER_RANK are the ranks of the attacking and defending piece respectively
+			- The moved piece was destroyed by an opponent piece that it attacked: "DIES $ATTACKER_RANK $DEFENDER_RANK"
+				- ATTACKER_RANK and DEFENDER_RANK are the ranks of the attacking and defending piece respectively
+			- The moved piece attacked an opponent piece, and both pieces were destroyed: "BOTHDIE $ATTACKER_RANK $DEFENDER_RANK"
+				- ATTACKER_RANK and DEFENDER_RANK are the ranks of the attacking and defending piece respectively
+			- Game ended due to the attacker capturing a flag: "VICTORY_FLAG"
+			- Game ended due to the destruction of a player's last mobile piece (either attacker or defender): " 
+
+		ROW1 -> ROW10 - The state of the board will be printed
+			      - Each line represents a row on the board, from the top downwards
+			      - The characters are as desribed above in "GAME RULES"
+			      - Enemy pieces will NOT be revealed, even if they have been involved in combat. They are always shown as '#'.
+			      - It is recommended that AI's rely on the LASTMOVE and OUTCOME results to keep state
+			      - Interpreting these lines is not necessary, or recommended
+			      - They still exist because I say so. GET OVER IT.
+
+		[Sent data]
+
+		X - The x coordinate of the piece to be moved. Ranges from 0 (zero) to 9 (nine) (left to right)
+		Y - The y coordinate of the piece to be moved. Ranges from 0 (zero) to 9 (nine) (top to bottom)
+		DIRECTION - The direction to move the piece in. May be either "LEFT", "RIGHT", "UP" or "DOWN"		
+		MULTIPLIER - Scouts may move more than one square.
+			   - To move a scout multiple spaces, print an integer indicating the number of spaces immediately after DIRECTION
+
+		[Recieved data 2]
+
+		The manager program will check the validity of the move, and respond by repeating it back to the AI, followed by OUTCOME.
+		OUTCOME is as described above.
+		---------------------------------------------------
+		Example:
+		---------------------------------------------------
+
+		First turn for RED:
+		-------------------
+		>> START
+		>> FB8sB479B8
+		>> BB31555583
+		>> 6724898974
+		>> 967B669999
+		>> ..++..++..
+		>> ..++..++..
+		>> ##########
+		>> ##########
+		>> ##########
+		>> ##########
+		<< 0 3 DOWN
+		>> 0 3 DOWN OK
+		-------------------
+		Continuing from the Setup example, the RED AI is told to start, and then the board is printed.
+		Note that only RED's pieces are revealed. The obstacles are always in the same place, as shown.
+		Refer to the "GAME RULES" section for an explanation of each piece character.
+
+		The AI decides to move its scout (9) at (0,3) downwards by one place.
+		
+		The manager reports that this move was successful.
+
+		Second Turn for RED:
+		-------------------
+		>> 9 6 UP 3 BOTHDIE 9 9
+		>> FB8sB479B8
+		>> BB31555583
+		>> 6724898974
+		>> .67B66999.
+		>> 9.++..++..
+		>> ..++..++..
+		>> #########.
+		>> ##########
+		>> ##########
+		>> ##########
+		<< 9 2 DOWN
+		>> 9 2 DOWN OK
+		-------------------
+		The next message recieved by the RED AI tells it that BLUE has moved its piece at (9,6) up by 3.
+		This brought the piece into contact with RED's scout (9) at (9,3)
+		Since BLUE's piece was also a scout (9), both pieces die, indicated by "BOTHDIE" followed by their ranks (9 and 9)
+		
+		The board is printed again. Note that RED's first move is reflected 
+			(the scout (9) at (0,4)), and BLUE's last move (both (9,6) and (9,3) are now empty).
+	
+		The RED AI decides to move its major (4) at (9,2) downwards. This move is OK, because there is now nothing occupying (9,3).
+		---------------------------------------------------
+		WARNING:
+		---------------------------------------------------
+		It is recommended that you ignore the board state lines, except for the first turn.
+		Remember that an AI may not place all its pieces, so assuming its initial setup is a bad idea.
+		On subsequent turns, the board state lines provide no information that can't be processed from the move confirmation lines.
+		---------------------------------------------------
+
+	3. End Game
+		---------------------------------------------------
+		Description:
+		---------------------------------------------------
+		A message of "QUIT" at any time signals to an AI that the game is about to end.
+		This will be sent immediately after an AI makes a move of the form "$X $Y $DIRECTION [$MULTIPLIER=1]" which ends the game
+		It may also be sent at any time in case of errors
+		
+		The AI should immediately exit if a QUIT message is recieved.
+		---------------------------------------------------
+		Synopsis:
+		---------------------------------------------------
+		>> QUIT [$RESULT]
+		---------------------------------------------------
+		Explanation:
+		---------------------------------------------------
+		RESULT - Usually not present; it may contain debug information if it is.
+		---------------------------------------------------		
+	
+	4. Timeouts
+		---------------------------------------------------
+		Description:
+		---------------------------------------------------
+		If a program fails to respond to a query, the game will end and that AI will be sent the ILLEGAL result.
+		Human players are not subject to the timeout restriction.
+		---------------------------------------------------
+		Please see the information on the -T switch, and the "End Game" section above.
+
+	5. Resignation
+		---------------------------------------------------
+		Description:
+		---------------------------------------------------	
+		Instead of making a move, an AI program may resign.
+		---------------------------------------------------
+		Synopsis:
+		---------------------------------------------------
+		<< SURRENDER
+		>> QUIT SURRENDER
+		---------------------------------------------------
+		Explanation:
+		---------------------------------------------------
+		
+		---------------------------------------------------		
+			
+
+EXIT/OUTPUT
+	If the game ends due to a player either winning, or making an illegal move, stratego will print one the following result message to stdout.
+
+	$NAME $COLOUR $OUTCOME $TURN  $RED_PIECE_VALUE $BLUE_PIECE_VALUE
+
+	Where:
+		NAME is the name of the player on whose turn the game ended,
+
+		COLOUR is the colour of that player,
+
+		OUTCOME is one of the following:
+			VICTORY - The indicated player won
+			DEFEAT - The indicated player lost
+			SURRENDER - The indicated player surrendered
+			DRAW - The game ended in a draw because neither player moved
+			DRAW_DEFAULT - The game ended in a draw because the maximum number of moves was exceeded
+			ILLEGAL - The indicated player loses due to an Illegal move/response
+			DEFAULT - The indicated player wins by default due to the other player making an Illegal move/response
+			BOTH_ILLEGAL - Both players made an Illegal move/response. Usually occurs due to simultaneous setup errors.			
+					- May occur due to bad AI path names
+			INTERNAL_ERROR - The game ended, even though it shouldn't have.	
+
+		TURN is the number of turns that elapsed before the game ended
+
+		RED_PIECE_VALUE and BLUE_PIECE_VALUE are the summed piece values of the pieces of RED and BLUE respectively.
+		Bombs and Flags are worth zero, and the ranked pieces (Spys -> Marshal) are worth (11 - rank).
+		So the Spy is worth 1 point, ... the Marshal is worth 10.
+
+		(The initial piece values can be determined by running with -m 0)
+		
+
+	stratego will then return exit code 0.
+
+	If an error occurs within stratego itself, an error message will be printed to stderr and return exit code 1.
+	If possible, stratego will print the message "QUIT" to both AI programs, and they should exit as soon as possible.
+
+BUILDING
+	To build from source, simply run make in the source directory.
+	You will need the C pthread library (which should come with gcc)
+
+	stratego can be built with or without graphics enabled. By default, graphics are disabled.
+
+	To enable graphics:
+	1. Ensure that the first line of the source file "graphics.h" reads:
+		#define BUILD_GRAPHICS
+	2. In "Makefile", uncomment the line "LIBRARIES = -lSDL -lGL -lpthread" 
+		and comment out the line "LIBRARIES = -lpthread"
+
+	To disable graphics:
+	1. Comment out the first line of "graphics.h" i.e ensure that it reads:
+		//#define BUILD_GRAPHICS
+	2. In "Makefile", uncomment the line "LIBRARIES = -lpthread" 
+		and comment out the line "LIBRARIES = -lSDL -lGL -lpthread"
+
+	If you intend to build with graphics enabled, you will need the SDL and OpenGL developement libraries installed first.
+	If you intend to use graphics, please ensure the "images" directory is located in the executable's run directory.
+
+	
+	
+
+BUGS	
+	Occasionally the result is not printed at the end of the game. 
+	So far this has only been observed to occur when RED wins the game by Flag capture.
+
+	stratego is still a work in progress. Report another bug to the AUTHOR (see below).
+
+
+AUTHORS
+	Sam Moore (for the UCC Programming Competition 2012) <matches@ucc.asn.au>
+
+NOTES
+	0. This program is still a work in progress and subject to changes.
+	
+	1. UCC Programming Competition 2012 Description
+	   http://progcomp.ucc.asn.au
+
+	2. UCC Programming Competition 2012 Git repository
+	   git://git.ucc.asn.au/progcomp2012.git
+
+ 
+	3. IRC Channel
+	   irc://irc.ucc.asn.au #progcomp
+
+THIS PAGE LAST UPDATED
+	09/04/12 by Sam Moore
+	

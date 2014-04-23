@@ -53,3 +53,10 @@ Often it ends up losing these pieces quickly
 but as often these forays result in substantial material gain,
 especially eights, making this bot difficult to win
 against successively. 
+
+Like the other agents,
+ramen relentlessly chases opponent pieces.
+Unlike the other agents, it never gives up, creating an endless
+loop.
+Therefore this agent cannot be used for testing without
+modifying its code to give up on endless chases.
