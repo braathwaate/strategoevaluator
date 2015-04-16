@@ -10,10 +10,10 @@ a two player game in the capture-the-flag genre.
 It was developed by Sam Moore of the University Computer Club
 in Australia to judge a 2012 programming competition where
 several stratego ai bots competed
-[git repository](http://git.ucc.asn.au/?p=progcomp2012.git;a=summary).
+[source git repository](http://git.ucc.asn.au/?p=progcomp2012.git;a=summary).
 
-The manager program provides a protocol
-and human user interface including graphics for
+The manager program defines a protocol (API)
+and provides a human user interface including graphics for
 the competing agents.  It can also be used by
 a human for playing against the ai bots.
 
@@ -22,6 +22,13 @@ and the agents used in the 2012 competition.
 It is duplicated here on github because it is used
 for regression testing the stratego ai bot
 [braathwaate/stratego](https://github.com/braathwaate/stratego).
+It could also be used to expediate the
+evaluation of alternative approaches
+to Stratego Artificial Intelligence development,,
+such as
+Neural Networks,
+Monte Carlo,
+or other such algorithms.
 
 Installation and Requirements
 -----------------------------
@@ -48,11 +55,11 @@ a bug that perhaps should easily be fixed.
 
 celsius was the runner up in the 2012 programming competition.
 It uses its low ranking pieces early in the game
-to aggressively attack unknown pieces.
+to aggressively attack unknown and unmoved pieces.
 Often it ends up losing these pieces quickly
 but as often these forays result in substantial material gain,
-especially eights, making this bot difficult to win
-against successively. 
+especially eights, making it difficult to win
+all games against this bot.
 
 Like the other agents,
 ramen relentlessly chases opponent pieces.

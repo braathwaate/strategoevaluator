@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <string>
+#include <unistd.h>
 
 using namespace std;
 
